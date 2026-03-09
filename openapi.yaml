@@ -1,0 +1,572 @@
+openapi: 3.0.3
+info:
+  title: BLE People Tracker API
+  description: |
+    API for readers, events, active BLE (children), and auth.
+    **Required:** Send `x-api-key` header on every request.
+    For `/auth/me` and `/auth/logout`, also send `Authorization: Bearer <token>` (token from login).
+  version: 1.0.0
+
+servers:
+  - url: https://rkali63t89.execute-api.us-east-2.amazonaws.com/Prod
+    description: Production
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (required on every request)
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Session token from /auth/login (required for /auth/me and /auth/logout)
+
+  schemas:
+    Reader:
+      type: object
+      properties:
+        reader_name: { type: string }
+        name: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        display_name: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Event:
+      type: object
+      properties:
+        id: { type: integer }
+        mac: { type: string }
+        reader_name: { type: string }
+        direction: { type: string, enum: [in, out] }
+        name: { type: string, nullable: true }
+        date_time: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    ActiveBle:
+      type: object
+      properties:
+        id: { type: integer }
+        mac: { type: string }
+        active: { type: boolean }
+        lname: { type: string, nullable: true }
+        fname: { type: string, nullable: true }
+        parent_id: { type: integer, nullable: true }
+        duration: { type: integer, nullable: true }
+        parent_fname: { type: string, nullable: true }
+        parent_lname: { type: string, nullable: true }
+        parent_phone: { type: string, nullable: true }
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        email: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+
+paths:
+  /readers:
+    get:
+      summary: List all readers
+      tags: [Readers]
+      responses:
+        '200':
+          description: List of readers
+          content:
+            application/json:
+              schema: { type: object, properties: { readers: { type: array, items: { $ref: '#/components/schemas/Reader' } } } }
+    post:
+      summary: Create reader
+      tags: [Readers]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reader_name, latitude, longitude]
+              properties:
+                reader_name: { type: string }
+                latitude: { type: number }
+                longitude: { type: number }
+                display_name: { type: string }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reader' }
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /readers/{readerName}:
+    parameters:
+      - name: readerName
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get one reader
+      tags: [Readers]
+      responses:
+        '200':
+          description: Reader
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reader' }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    put:
+      summary: Full update reader
+      tags: [Readers]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                latitude: { type: number }
+                longitude: { type: number }
+                name: { type: string }
+                display_name: { type: string }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reader' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    patch:
+      summary: Partial update reader
+      tags: [Readers]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                latitude: { type: number }
+                longitude: { type: number }
+                name: { type: string }
+                display_name: { type: string }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reader' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      summary: Delete reader
+      tags: [Readers]
+      responses:
+        '200':
+          description: Deleted
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /readers/{readerName}/events:
+    parameters:
+      - name: readerName
+        in: path
+        required: true
+        schema: { type: string }
+      - name: direction
+        in: query
+        schema: { type: string, enum: [in, out] }
+    get:
+      summary: List events at reader
+      tags: [Readers]
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema: { type: object, properties: { events: { type: array, items: { $ref: '#/components/schemas/Event' } } } }
+
+  /events:
+    get:
+      summary: List all events
+      tags: [Events]
+      parameters:
+        - name: direction
+          in: query
+          schema: { type: string, enum: [in, out] }
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema: { type: object, properties: { events: { type: array, items: { $ref: '#/components/schemas/Event' } } } }
+    post:
+      summary: Create event
+      tags: [Events]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reader_name, mac]
+              properties:
+                reader_name: { type: string }
+                mac: { type: string }
+                direction: { type: string, enum: [in, out] }
+                name: { type: string }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '400':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /events/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer }
+    get:
+      summary: Get one event
+      tags: [Events]
+      responses:
+        '200':
+          description: Event
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    put:
+      summary: Full update event
+      tags: [Events]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reader_name: { type: string }
+                mac: { type: string }
+                direction: { type: string, enum: [in, out] }
+                name: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    patch:
+      summary: Partial update event
+      tags: [Events]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reader_name: { type: string }
+                mac: { type: string }
+                direction: { type: string, enum: [in, out] }
+                name: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      summary: Delete event
+      tags: [Events]
+      responses:
+        '200':
+          description: Deleted
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /events/person/{mac}:
+    parameters:
+      - name: mac
+        in: path
+        required: true
+        schema: { type: string }
+      - name: direction
+        in: query
+        schema: { type: string, enum: [in, out] }
+    get:
+      summary: List events for person (MAC)
+      tags: [Events]
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema: { type: object, properties: { events: { type: array, items: { $ref: '#/components/schemas/Event' } } } }
+
+  /active-ble:
+    get:
+      summary: List all active_ble rows
+      tags: [Active BLE]
+      responses:
+        '200':
+          description: List of active BLE rows
+          content:
+            application/json:
+              schema: { type: object, properties: { active_ble: { type: array, items: { $ref: '#/components/schemas/ActiveBle' } } } }
+    post:
+      summary: Create active_ble row
+      description: Returns 409 "User Exists" if mac already in table.
+      tags: [Active BLE]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mac]
+              properties:
+                mac: { type: string, maxLength: 17 }
+                active: { type: boolean, default: true }
+                lname: { type: string }
+                fname: { type: string }
+                parent_id: { type: integer, nullable: true }
+                duration: { type: integer, nullable: true }
+                parent_fname: { type: string }
+                parent_lname: { type: string }
+                parent_phone: { type: string, maxLength: 20 }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActiveBle' }
+        '400':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: User Exists (mac already in table)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /active-ble/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer }
+    get:
+      summary: Get one active_ble row by id
+      tags: [Active BLE]
+      responses:
+        '200':
+          description: Active BLE row
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActiveBle' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    patch:
+      summary: Update active_ble row by id
+      description: Returns 409 "User Exists" if new mac already used by another row.
+      tags: [Active BLE]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mac: { type: string, maxLength: 17 }
+                active: { type: boolean }
+                lname: { type: string }
+                fname: { type: string }
+                parent_id: { type: integer, nullable: true }
+                duration: { type: integer, nullable: true }
+                parent_fname: { type: string }
+                parent_lname: { type: string }
+                parent_phone: { type: string, maxLength: 20 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActiveBle' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /auth/register:
+    post:
+      summary: Register user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+                email: { type: string }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { type: object, properties: { user: { $ref: '#/components/schemas/User' } } }
+        '400':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /auth/login:
+    post:
+      summary: Log in
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Returns user and token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+                  token: { type: string }
+                  expires_at: { type: string }
+        '401':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /auth/me:
+    get:
+      summary: Current user (requires Bearer token)
+      tags: [Auth]
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema: { type: object, properties: { user: { $ref: '#/components/schemas/User' } } }
+        '401':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /auth/logout:
+    post:
+      summary: Log out (invalidate session, requires Bearer token)
+      tags: [Auth]
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logged out
+        '401':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /auth/password-reset/request:
+    post:
+      summary: Request password reset
+      tags: [Auth]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                username: { type: string }
+      responses:
+        '200':
+          description: Reset email sent or acknowledged
+        '400':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /auth/password-reset/confirm:
+    post:
+      summary: Set new password with reset token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, new_password]
+              properties:
+                token: { type: string }
+                new_password: { type: string }
+      responses:
+        '200':
+          description: Password updated
+        '400':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
