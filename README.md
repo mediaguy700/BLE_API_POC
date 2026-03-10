@@ -33,14 +33,6 @@ curl -s -X POST -H "x-api-key: $BLE_API_KEY" -H "Content-Type: application/json"
   -d '{"username":"YOUR_USERNAME","password":"YOUR_PASSWORD"}' "$BLE_API_URL/auth/login"
 ```
 
-### Swagger UI (interactive docs)
-
-```bash
-python3 -m http.server 8080
-```
-
-Open **http://localhost:8080/swagger.html**, click **Authorize**, enter your API key, then use "Try it out" on any endpoint.
-
 ## API Overview
 
 | Resource | Endpoints |
