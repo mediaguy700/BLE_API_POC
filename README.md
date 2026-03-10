@@ -22,15 +22,15 @@ REST API for tracking BLE (Bluetooth Low Energy) readers, events, and people. Bu
 
 ```bash
 # Set credentials (or use static-2week-api-access.env)
-export BLE_API_URL="https://rkali63t89.execute-api.us-east-2.amazonaws.com/Prod"
-export BLE_API_KEY="MlzzVbn4og1AN93aBra5pa9OTKZs716j35uFuV1I"
+export BLE_API_URL="https://your-api-id.execute-api.region.amazonaws.com/Prod"
+export BLE_API_KEY="your-api-key"
 
 # List readers
 curl -s -H "x-api-key: $BLE_API_KEY" "$BLE_API_URL/readers"
 
-# Login (test user: testuser2 / TestPass123!)
+# Login
 curl -s -X POST -H "x-api-key: $BLE_API_KEY" -H "Content-Type: application/json" \
-  -d '{"username":"testuser2","password":"TestPass123!"}' "$BLE_API_URL/auth/login"
+  -d '{"username":"YOUR_USERNAME","password":"YOUR_PASSWORD"}' "$BLE_API_URL/auth/login"
 ```
 
 ### Swagger UI (interactive docs)
@@ -39,7 +39,7 @@ curl -s -X POST -H "x-api-key: $BLE_API_KEY" -H "Content-Type: application/json"
 python3 -m http.server 8080
 ```
 
-Open **http://localhost:8080/swagger.html**, click **Authorize**, enter the API key, then use "Try it out" on any endpoint.
+Open **http://localhost:8080/swagger.html**, click **Authorize**, enter your API key, then use "Try it out" on any endpoint.
 
 ## API Overview
 
@@ -90,10 +90,3 @@ After first deploy, invoke the Schema Runner Lambda once to run `schema.sql` and
 | [DEVELOPER_ACCESS.md](DEVELOPER_ACCESS.md) | How developers get URL + API key |
 | [openapi.yaml](openapi.yaml) | OpenAPI 3.0 specification |
 
-## Test Account
-
-| Field | Value |
-|-------|-------|
-| Username | `testuser2` |
-| Password | `TestPass123!` |
-| Email | `testuser2@example.com` |
