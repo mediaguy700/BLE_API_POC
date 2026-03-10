@@ -1,0 +1,334 @@
+{
+  "info": {
+    "name": "BLE People Tracker API",
+    "description": "API for readers, events, active BLE, and auth. Set `base_url` and `api_key` in collection variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://your-api-id.execute-api.region.amazonaws.com/Prod" },
+    { "key": "api_key", "value": "your-api-key", "type": "string" },
+    { "key": "bearer_token", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key", "value": "x-api-key", "type": "string" },
+      { "key": "value", "value": "{{api_key}}", "type": "string" },
+      { "key": "in", "value": "header", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "POST Endpoints",
+      "description": "All POST methods in one place",
+      "item": [
+        {
+          "name": "POST /readers - Create reader",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reader_name\": \"Lobby-01\",\n  \"latitude\": 40.71,\n  \"longitude\": -74.01,\n  \"display_name\": \"Main Lobby\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/readers", "host": ["{{base_url}}"], "path": ["readers"] }
+          }
+        },
+        {
+          "name": "POST /events - Create event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reader_name\": \"Lobby-01\",\n  \"mac\": \"AA:BB:CC:DD:EE:01\",\n  \"direction\": \"in\",\n  \"name\": \"Alice\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/events", "host": ["{{base_url}}"], "path": ["events"] }
+          }
+        },
+        {
+          "name": "POST /active-ble - Create active BLE",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mac\": \"AA:BB:CC:DD:EE:01\",\n  \"active\": true,\n  \"fname\": \"Jane\",\n  \"lname\": \"Doe\",\n  \"parent_fname\": \"Bob\",\n  \"parent_lname\": \"Doe\",\n  \"parent_phone\": \"555-1234\",\n  \"duration\": 60\n}"
+            },
+            "url": { "raw": "{{base_url}}/active-ble", "host": ["{{base_url}}"], "path": ["active-ble"] }
+          }
+        },
+        {
+          "name": "POST /auth/register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"YourPassword\",\n  \"email\": \"alice@example.com\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "POST /auth/login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"YourPassword\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "POST /auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}" }],
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+          }
+        },
+        {
+          "name": "POST /auth/password-reset/request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"alice\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/password-reset/request", "host": ["{{base_url}}"], "path": ["auth", "password-reset", "request"] }
+          }
+        },
+        {
+          "name": "POST /auth/password-reset/confirm",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"reset-token-from-email\",\n  \"new_password\": \"NewPassword\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/password-reset/confirm", "host": ["{{base_url}}"], "path": ["auth", "password-reset", "confirm"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Readers",
+      "item": [
+        {
+          "name": "List readers",
+          "request": { "method": "GET", "url": "{{base_url}}/readers" }
+        },
+        {
+          "name": "Get reader",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/readers/Lobby-01", "host": ["{{base_url}}"], "path": ["readers", "Lobby-01"] }
+          }
+        },
+        {
+          "name": "Create reader",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reader_name\": \"Lobby-01\",\n  \"latitude\": 40.71,\n  \"longitude\": -74.01,\n  \"display_name\": \"Main Lobby\"\n}"
+            },
+            "url": "{{base_url}}/readers"
+          }
+        },
+        {
+          "name": "Update reader (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 40.72,\n  \"longitude\": -74.02,\n  \"display_name\": \"Updated Lobby\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/readers/Lobby-01", "host": ["{{base_url}}"], "path": ["readers", "Lobby-01"] }
+          }
+        },
+        {
+          "name": "Update reader (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"display_name\": \"Patched Name\"\n}" },
+            "url": { "raw": "{{base_url}}/readers/Lobby-01", "host": ["{{base_url}}"], "path": ["readers", "Lobby-01"] }
+          }
+        },
+        {
+          "name": "Delete reader",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/readers/Lobby-01", "host": ["{{base_url}}"], "path": ["readers", "Lobby-01"] } }
+        },
+        {
+          "name": "List reader events",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/readers/Lobby-01/events?direction=in", "host": ["{{base_url}}"], "path": ["readers", "Lobby-01", "events"], "query": [{ "key": "direction", "value": "in" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List events",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/events?direction=in", "host": ["{{base_url}}"], "path": ["events"], "query": [{ "key": "direction", "value": "in" }] }
+          }
+        },
+        {
+          "name": "Get event",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/events/1", "host": ["{{base_url}}"], "path": ["events", "1"] } }
+        },
+        {
+          "name": "Create event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reader_name\": \"Lobby-01\",\n  \"mac\": \"AA:BB:CC:DD:EE:01\",\n  \"direction\": \"in\",\n  \"name\": \"Alice\"\n}"
+            },
+            "url": "{{base_url}}/events"
+          }
+        },
+        {
+          "name": "Update event (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reader_name\": \"Lobby-01\",\n  \"mac\": \"AA:BB:CC:DD:EE:01\",\n  \"direction\": \"out\",\n  \"name\": \"Alice Updated\"\n}" },
+            "url": { "raw": "{{base_url}}/events/1", "host": ["{{base_url}}"], "path": ["events", "1"] }
+          }
+        },
+        {
+          "name": "Update event (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Patched Name\"\n}" },
+            "url": { "raw": "{{base_url}}/events/1", "host": ["{{base_url}}"], "path": ["events", "1"] }
+          }
+        },
+        {
+          "name": "Delete event",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/events/1", "host": ["{{base_url}}"], "path": ["events", "1"] } }
+        },
+        {
+          "name": "List events by person (MAC)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/events/person/AA:BB:CC:DD:EE:01?direction=in", "host": ["{{base_url}}"], "path": ["events", "person", "AA:BB:CC:DD:EE:01"], "query": [{ "key": "direction", "value": "in" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Active BLE",
+      "item": [
+        {
+          "name": "List active BLE",
+          "request": { "method": "GET", "url": "{{base_url}}/active-ble" }
+        },
+        {
+          "name": "Get active BLE by id",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/active-ble/1", "host": ["{{base_url}}"], "path": ["active-ble", "1"] } }
+        },
+        {
+          "name": "Create active BLE",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mac\": \"AA:BB:CC:DD:EE:01\",\n  \"active\": true,\n  \"fname\": \"Jane\",\n  \"lname\": \"Doe\",\n  \"parent_fname\": \"Bob\",\n  \"parent_lname\": \"Doe\",\n  \"parent_phone\": \"555-1234\",\n  \"duration\": 60\n}"
+            },
+            "url": "{{base_url}}/active-ble"
+          }
+        },
+        {
+          "name": "Update active BLE",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"active\": false,\n  \"parent_phone\": \"555-9999\"\n}" },
+            "url": { "raw": "{{base_url}}/active-ble/1", "host": ["{{base_url}}"], "path": ["active-ble", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"YourPassword\",\n  \"email\": \"alice@example.com\"\n}"
+            },
+            "url": "{{base_url}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"YourPassword\"\n}"
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Me (current user)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}" }],
+            "url": "{{base_url}}/auth/me"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}" }],
+            "url": "{{base_url}}/auth/logout"
+          }
+        },
+        {
+          "name": "Password reset request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"alice\"\n}" },
+            "url": "{{base_url}}/auth/password-reset/request"
+          }
+        },
+        {
+          "name": "Password reset confirm",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"reset-token-from-email\",\n  \"new_password\": \"NewPassword\"\n}"
+            },
+            "url": "{{base_url}}/auth/password-reset/confirm"
+          }
+        }
+      ]
+    }
+  ]
+}
